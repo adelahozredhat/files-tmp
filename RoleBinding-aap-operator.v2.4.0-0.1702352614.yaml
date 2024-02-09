@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    name: aap-operator.v2.4.0-0.1702352614
+    namespace: aap
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: aap-operator.v2.4.0-0.1702352614
+subjects:
+-   kind: ServiceAccount
+    name: resource-operator-controller-manager
+-   kind: ServiceAccount
+    name: automation-controller-operator-controller-manager
+-   kind: ServiceAccount
+    name: automation-hub-operator-sa
+-   kind: ServiceAccount
+    name: eda-server-operator-controller-manager
+-   kind: ServiceAccount
+    name: automation-hub-operator-sa

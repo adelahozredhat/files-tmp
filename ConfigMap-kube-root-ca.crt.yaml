@@ -246,4 +246,4 @@ data:
 kind: ConfigMap
 metadata:
     name: kube-root-ca.crt
-    namespace: ansible-prod-axa-es
+    namespace: aap

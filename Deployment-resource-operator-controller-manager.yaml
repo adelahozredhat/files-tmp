@@ -7,10 +7,10 @@ metadata:
         olm.deployment-spec-hash: 5c5b7cd8d8
         olm.owner: aap-operator.v2.4.0-0.1702352614
         olm.owner.kind: ClusterServiceVersion
-        olm.owner.namespace: ansible-prod-axa-es
+        olm.owner.namespace: aap
         operators.coreos.com/ansible-automation-platform-operator.aap: ''
     name: resource-operator-controller-manager
-    namespace: ansible-prod-axa-es
+    namespace: aap
 spec:
     progressDeadlineSeconds: 600
     replicas: 1
