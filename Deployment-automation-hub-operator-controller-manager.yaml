@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    generation: 1
+    labels:
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/name: automation-hub-operator
+        control-plane: controller-manager
+        olm.deployment-spec-hash: 759f77df94
+        olm.owner: aap-operator.v2.4.0-0.1702352614
+        olm.owner.kind: ClusterServiceVersion
+        olm.owner.namespace: ansible-prod-axa-es
+        operators.coreos.com/ansible-automation-platform-operator.aap: ''
+        owner: automation-hub
+    name: automation-hub-operator-controller-manager
+    namespace: ansible-prod-axa-es
+spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 1
+    selector:
+        matchLabels:
+            control-plane: controller-manager
+    strategy:
+        rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                app.kubernetes.io/component: operator
+                app.kubernetes.io/name: automation-hub-operator
+                control-plane: controller-manager
+        spec:
+            containers:
+            -   args:
+                - --secure-listen-address=0.0.0.0:8443
+                - --upstream=http://127.0.0.1:8080/
+                - --logtostderr=true
+                - --v=0
+                env:
+                -   name: OPERATOR_CONDITION_NAME
+                    value: aap-operator.v2.4.0-0.1702352614
+                image: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:3b0eb7d2d3ac3ab0ed847c521f2c5a629e579a8778829a71d5841e762eea5fb9
+                imagePullPolicy: IfNotPresent
+                name: kube-rbac-proxy
+                ports:
+                -   containerPort: 8443
+                    name: https
+                    protocol: TCP
+                resources:
+                    limits:
+                        cpu: 500m
+                        memory: 128Mi
+                    requests:
+                        cpu: 5m
+                        memory: 64Mi
+                securityContext:
+                    allowPrivilegeEscalation: false
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+            -   args:
+                - --health-probe-bind-address=:6789
+                - --metrics-bind-address=127.0.0.1:8080
+                - --leader-elect
+                - --leader-election-id=automation-hub-operator
+                env:
+                -   name: WATCH_NAMESPACE
+                    valueFrom:
+                        fieldRef:
+                            apiVersion: v1
+                            fieldPath: metadata.annotations['olm.targetNamespaces']
+                -   name: ANSIBLE_GATHERING
+                    value: explicit
+                -   name: ANSIBLE_DEBUG_LOGS
+                    value: 'false'
+                -   name: RELATED_IMAGE_HUB
+                    value: registry.redhat.io/ansible-automation-platform-24/hub-rhel8@sha256:996bd1deec251efcbd0d902c35d1dc523c1028c26158705bf05c9d714abf3ffa
+                -   name: RELATED_IMAGE_HUB_WEB
+                    value: registry.redhat.io/ansible-automation-platform-24/hub-web-rhel8@sha256:28ffac70395e8fc4c12e0609eb03c34e538004c9494b5e67b8a75f527ca82192
+                -   name: RELATED_IMAGE_HUB_REDIS
+                    value: registry.redhat.io/rhel8/redis-6@sha256:26573f1230a3c7df5475d5968bf6595719950906f8e7594b5394ad6fcab9b0e4
+                -   name: RELATED_IMAGE_HUB_POSTGRES
+                    value: registry.redhat.io/rhel8/postgresql-13@sha256:6ecee6d67013493b2735d7c300b0809e4c261a0f682d8f981d5cc4058e990c4c
+                -   name: RELATED_IMAGE_HUB_INIT_GPG_CONTAINER
+                    value: registry.redhat.io/ubi8/ubi-minimal@sha256:87bcbfedfd70e67aab3875fff103bade460aeff510033ebb36b7efa009ab6639
+                -   name: OPERATOR_CONDITION_NAME
+                    value: aap-operator.v2.4.0-0.1702352614
+                image: registry.redhat.io/ansible-automation-platform-24/hub-rhel8-operator@sha256:9bc95e664649bea0d8fe6d328b631db3a624ef59f1e57c15f27651087296c0b4
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                    failureThreshold: 3
+                    httpGet:
+                        path: /healthz
+                        port: 6789
+                        scheme: HTTP
+                    initialDelaySeconds: 15
+                    periodSeconds: 20
+                    successThreshold: 1
+                    timeoutSeconds: 1
+                name: automation-hub-manager
+                readinessProbe:
+                    failureThreshold: 3
+                    httpGet:
+                        path: /readyz
+                        port: 6789
+                        scheme: HTTP
+                    initialDelaySeconds: 5
+                    periodSeconds: 10
+                    successThreshold: 1
+                    timeoutSeconds: 1
+                resources:
+                    limits:
+                        cpu: '2'
+                        memory: 4000Mi
+                    requests:
+                        cpu: 10m
+                        memory: 256Mi
+                securityContext:
+                    allowPrivilegeEscalation: false
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+            dnsPolicy: ClusterFirst
+            imagePullSecrets:
+            -   name: redhat-operators-pull-secret
+            restartPolicy: Always
+            schedulerName: default-scheduler
+            securityContext:
+                runAsNonRoot: true
+            serviceAccount: automation-hub-operator-sa
+            serviceAccountName: automation-hub-operator-sa
+            terminationGracePeriodSeconds: 10
+status:
+    availableReplicas: 1
+    conditions:
+    -   lastTransitionTime: '2024-02-09T08:35:42Z'
+        lastUpdateTime: '2024-02-09T08:35:42Z'
+        message: Deployment has minimum availability.
+        reason: MinimumReplicasAvailable
+        status: 'True'
+        type: Available
+    -   lastTransitionTime: '2024-02-09T08:35:01Z'
+        lastUpdateTime: '2024-02-09T08:35:42Z'
+        message: ReplicaSet "automation-hub-operator-controller-manager-5cd89df97"
+            has successfully progressed.
+        reason: NewReplicaSetAvailable
+        status: 'True'
+        type: Progressing
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1

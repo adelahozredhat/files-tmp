@@ -1,0 +1,47 @@
+apiVersion: v1
+data:
+    service-ca.crt: '-----BEGIN CERTIFICATE-----
+
+        MIIDUTCCAjmgAwIBAgIILpq54Hs7eDMwDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UE
+
+        Awwrb3BlbnNoaWZ0LXNlcnZpY2Utc2VydmluZy1zaWduZXJAMTcwNDI4MDg4MjAe
+
+        Fw0yNDAxMDMxMTIxMjFaFw0yNjAzMDMxMTIxMjJaMDYxNDAyBgNVBAMMK29wZW5z
+
+        aGlmdC1zZXJ2aWNlLXNlcnZpbmctc2lnbmVyQDE3MDQyODA4ODIwggEiMA0GCSqG
+
+        SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJOwg4sbLHegtYREW/2Cn9G4bug43Oo2Od
+
+        MNAgVL0cQfIS5BfoKRxEiA3e9tY+CuPzbLl/9hfPBFn9Jc0CI4y4bNP6ARrAwA0H
+
+        Qbn1eePTzBBx32t2HsjiT9QftcYGqYWBJiOT3zLFXEsFPyMYKCfqLYAYwjqX150D
+
+        DL2p/sNutVynEyAcQRMSCQhoxK6Xd6Vliel9eg9T+1dawUKE39p5i0UY/Geog7li
+
+        ttjuDLVBmSnXXRzCjPW8YyOYQGdOtY62cVm4O/I1N+ugs2qR1datT7Qx+4xUvSia
+
+        1oXb7dG/hzEp9bqXAL4m6pviO/0dL4kkbQ+igC9XUu8pUuMb0QWBAgMBAAGjYzBh
+
+        MA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQfRQrZ
+
+        PwG3fh0mmi29gBJSzIuGzDAfBgNVHSMEGDAWgBQfRQrZPwG3fh0mmi29gBJSzIuG
+
+        zDANBgkqhkiG9w0BAQsFAAOCAQEACeFsBfbrZoO3dBfcIUZwg2WJdicuj9BiEKSZ
+
+        86kL0QfuJcHRP9F7/AySUBoUDR744kvxcfvmKc2QYwjf3K8CzYUTOX0s4bQh7t2X
+
+        njH0gxJA7SzQH3m2L6S5dvxaxftG59Zd6T414ygO5nrtaN1tIRV/XD+/DwW2JwwE
+
+        DVCfTHSTQIY3J9a6prkGeBrmdpr3JAVMEYOFxN3uPdWkt1UjqFB6OTIW/R7SznoO
+
+        YVdswOtZ1IypiFY5rBfEml9+SsTsWz36TSmJB4zILc6ny7pGc1zUdYlywj/yEPxR
+
+        ivL5Ch02gYuXiV3QsazE4uqFIuh21Smz8d6mvTJ8IInsbGEOPA==
+
+        -----END CERTIFICATE-----
+
+        '
+kind: ConfigMap
+metadata:
+    name: openshift-service-ca.crt
+    namespace: ansible-prod-axa-es

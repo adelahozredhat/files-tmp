@@ -1,0 +1,178 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    generation: 1
+    labels:
+        app.kubernetes.io/component: eda-manager
+        app.kubernetes.io/created-by: eda-server-operator
+        app.kubernetes.io/instance: controller-manager
+        app.kubernetes.io/managed-by: kustomize
+        app.kubernetes.io/name: deployment
+        app.kubernetes.io/part-of: eda-server-operator
+        control-plane: controller-manager
+        olm.deployment-spec-hash: 6656d4c6b4
+        olm.owner: aap-operator.v2.4.0-0.1702352614
+        olm.owner.kind: ClusterServiceVersion
+        olm.owner.namespace: ansible-prod-axa-es
+        operators.coreos.com/ansible-automation-platform-operator.aap: ''
+    name: eda-server-operator-controller-manager
+    namespace: ansible-prod-axa-es
+spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 1
+    selector:
+        matchLabels:
+            control-plane: controller-manager
+    strategy:
+        rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                control-plane: controller-manager
+        spec:
+            affinity:
+                nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                        -   matchExpressions:
+                            -   key: kubernetes.io/arch
+                                operator: In
+                                values:
+                                - amd64
+                                - arm64
+                                - ppc64le
+                                - s390x
+                            -   key: kubernetes.io/os
+                                operator: In
+                                values:
+                                - linux
+            containers:
+            -   args:
+                - --secure-listen-address=0.0.0.0:8443
+                - --upstream=http://127.0.0.1:8080/
+                - --logtostderr=true
+                - --v=0
+                env:
+                -   name: OPERATOR_CONDITION_NAME
+                    value: aap-operator.v2.4.0-0.1702352614
+                image: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:3b0eb7d2d3ac3ab0ed847c521f2c5a629e579a8778829a71d5841e762eea5fb9
+                imagePullPolicy: IfNotPresent
+                name: kube-rbac-proxy
+                ports:
+                -   containerPort: 8443
+                    name: https
+                    protocol: TCP
+                resources:
+                    limits:
+                        cpu: 500m
+                        memory: 128Mi
+                    requests:
+                        cpu: 5m
+                        memory: 64Mi
+                securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                        drop:
+                        - ALL
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+            -   args:
+                - --health-probe-bind-address=:6789
+                - --metrics-bind-address=127.0.0.1:8080
+                - --leader-elect
+                - --leader-election-id=eda-server-operator
+                env:
+                -   name: ANSIBLE_GATHERING
+                    value: explicit
+                -   name: ANSIBLE_VERBOSITY
+                    value: '0'
+                -   name: ANSIBLE_DEBUG_LOGS
+                    value: 'false'
+                -   name: WATCH_NAMESPACE
+                    valueFrom:
+                        fieldRef:
+                            apiVersion: v1
+                            fieldPath: metadata.annotations['olm.targetNamespaces']
+                -   name: RELATED_IMAGE_EDA
+                    value: registry.redhat.io/ansible-automation-platform-24/eda-controller-rhel8@sha256:0df134576d35910efe875ab450273c1b6960981346c0c7fd0dc19c7691b1fcfe
+                -   name: RELATED_IMAGE_EDA_UI
+                    value: registry.redhat.io/ansible-automation-platform-24/eda-controller-ui-rhel8@sha256:f02dc7abfa755897567720f501717fca244f74da0b788e91f0cb3449bdc49a32
+                -   name: RELATED_IMAGE_EDA_INIT_CONTAINER
+                    value: registry.redhat.io/ubi8/ubi-minimal@sha256:87bcbfedfd70e67aab3875fff103bade460aeff510033ebb36b7efa009ab6639
+                -   name: RELATED_IMAGE_EDA_REDIS
+                    value: registry.redhat.io/rhel8/redis-6@sha256:26573f1230a3c7df5475d5968bf6595719950906f8e7594b5394ad6fcab9b0e4
+                -   name: RELATED_IMAGE_EDA_POSTGRES
+                    value: registry.redhat.io/rhel8/postgresql-13@sha256:6ecee6d67013493b2735d7c300b0809e4c261a0f682d8f981d5cc4058e990c4c
+                -   name: OPERATOR_CONDITION_NAME
+                    value: aap-operator.v2.4.0-0.1702352614
+                image: registry.redhat.io/ansible-automation-platform-24/eda-controller-rhel8-operator@sha256:da1a29c285125c11b5d9c5c15c36c73ed5713c18830fffd043a7891125f8a621
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                    failureThreshold: 3
+                    httpGet:
+                        path: /healthz
+                        port: 6789
+                        scheme: HTTP
+                    initialDelaySeconds: 15
+                    periodSeconds: 20
+                    successThreshold: 1
+                    timeoutSeconds: 1
+                name: eda-manager
+                readinessProbe:
+                    failureThreshold: 3
+                    httpGet:
+                        path: /readyz
+                        port: 6789
+                        scheme: HTTP
+                    initialDelaySeconds: 5
+                    periodSeconds: 10
+                    successThreshold: 1
+                    timeoutSeconds: 1
+                resources:
+                    limits:
+                        cpu: 500m
+                        memory: 768Mi
+                    requests:
+                        cpu: 10m
+                        memory: 256Mi
+                securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                        drop:
+                        - ALL
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+            dnsPolicy: ClusterFirst
+            imagePullSecrets:
+            -   name: redhat-operators-pull-secret
+            restartPolicy: Always
+            schedulerName: default-scheduler
+            securityContext:
+                runAsNonRoot: true
+            serviceAccount: eda-server-operator-controller-manager
+            serviceAccountName: eda-server-operator-controller-manager
+            terminationGracePeriodSeconds: 10
+status:
+    availableReplicas: 1
+    conditions:
+    -   lastTransitionTime: '2024-02-09T08:35:42Z'
+        lastUpdateTime: '2024-02-09T08:35:42Z'
+        message: Deployment has minimum availability.
+        reason: MinimumReplicasAvailable
+        status: 'True'
+        type: Available
+    -   lastTransitionTime: '2024-02-09T08:35:02Z'
+        lastUpdateTime: '2024-02-09T08:35:42Z'
+        message: ReplicaSet "eda-server-operator-controller-manager-6f9bccff8f" has
+            successfully progressed.
+        reason: NewReplicaSetAvailable
+        status: 'True'
+        type: Progressing
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1

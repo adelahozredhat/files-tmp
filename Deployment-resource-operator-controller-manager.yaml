@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    generation: 1
+    labels:
+        control-plane: controller-manager
+        olm.deployment-spec-hash: 5c5b7cd8d8
+        olm.owner: aap-operator.v2.4.0-0.1702352614
+        olm.owner.kind: ClusterServiceVersion
+        olm.owner.namespace: ansible-prod-axa-es
+        operators.coreos.com/ansible-automation-platform-operator.aap: ''
+    name: resource-operator-controller-manager
+    namespace: ansible-prod-axa-es
+spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 1
+    selector:
+        matchLabels:
+            control-plane: controller-manager
+    strategy:
+        rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                control-plane: controller-manager
+        spec:
+            containers:
+            -   args:
+                - --secure-listen-address=0.0.0.0:8443
+                - --upstream=http://127.0.0.1:8080/
+                - --logtostderr=true
+                - --v=10
+                env:
+                -   name: OPERATOR_CONDITION_NAME
+                    value: aap-operator.v2.4.0-0.1702352614
+                image: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:3b0eb7d2d3ac3ab0ed847c521f2c5a629e579a8778829a71d5841e762eea5fb9
+                imagePullPolicy: IfNotPresent
+                name: kube-rbac-proxy
+                ports:
+                -   containerPort: 8443
+                    name: https
+                    protocol: TCP
+                resources:
+                    limits:
+                        cpu: '1'
+                        memory: 512Mi
+                    requests:
+                        cpu: 5m
+                        memory: 64Mi
+                securityContext:
+                    allowPrivilegeEscalation: false
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+            -   args:
+                - --health-probe-bind-address=:6789
+                - --metrics-bind-address=127.0.0.1:8080
+                - --leader-elect
+                - --leader-election-id=platform-resource-operator
+                env:
+                -   name: ANSIBLE_GATHERING
+                    value: explicit
+                -   name: ANSIBLE_DEBUG_LOGS
+                    value: 'false'
+                -   name: WATCH_NAMESPACE
+                    valueFrom:
+                        fieldRef:
+                            apiVersion: v1
+                            fieldPath: metadata.annotations['olm.targetNamespaces']
+                -   name: RELATED_IMAGE_ANSIBLE_JOB_RUNNER_IMAGE
+                    value: registry.redhat.io/ansible-automation-platform-24/platform-resource-runner-rhel8@sha256:7e9de0a50e9a1e95ce4dfc5783f705242946dc31cb83e28c29a4dc2d21caba95
+                -   name: OPERATOR_CONDITION_NAME
+                    value: aap-operator.v2.4.0-0.1702352614
+                image: registry.redhat.io/ansible-automation-platform-24/platform-resource-rhel8-operator@sha256:7f904f47473f71bfc230a4e075877dfdc4d935961110fcea91734bbb75e41727
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                    failureThreshold: 3
+                    httpGet:
+                        path: /healthz
+                        port: 6789
+                        scheme: HTTP
+                    initialDelaySeconds: 15
+                    periodSeconds: 20
+                    successThreshold: 1
+                    timeoutSeconds: 1
+                name: platform-resource-manager
+                readinessProbe:
+                    failureThreshold: 3
+                    httpGet:
+                        path: /readyz
+                        port: 6789
+                        scheme: HTTP
+                    initialDelaySeconds: 5
+                    periodSeconds: 10
+                    successThreshold: 1
+                    timeoutSeconds: 1
+                resources:
+                    limits:
+                        cpu: '1'
+                        memory: 2Gi
+                    requests:
+                        cpu: 100m
+                        memory: 256Mi
+                securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                        drop:
+                        - ALL
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+            dnsPolicy: ClusterFirst
+            imagePullSecrets:
+            -   name: redhat-operators-pull-secret
+            restartPolicy: Always
+            schedulerName: default-scheduler
+            securityContext:
+                runAsNonRoot: true
+            serviceAccount: resource-operator-controller-manager
+            serviceAccountName: resource-operator-controller-manager
+            terminationGracePeriodSeconds: 10
+status:
+    availableReplicas: 1
+    conditions:
+    -   lastTransitionTime: '2024-02-09T08:35:42Z'
+        lastUpdateTime: '2024-02-09T08:35:42Z'
+        message: Deployment has minimum availability.
+        reason: MinimumReplicasAvailable
+        status: 'True'
+        type: Available
+    -   lastTransitionTime: '2024-02-09T08:35:01Z'
+        lastUpdateTime: '2024-02-09T08:35:42Z'
+        message: ReplicaSet "resource-operator-controller-manager-848774869c" has
+            successfully progressed.
+        reason: NewReplicaSetAvailable
+        status: 'True'
+        type: Progressing
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
