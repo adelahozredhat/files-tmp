@@ -44,4 +44,4 @@ data:
 kind: ConfigMap
 metadata:
     name: openshift-service-ca.crt
-    namespace: ansible-prod-axa-es
+    namespace: aap

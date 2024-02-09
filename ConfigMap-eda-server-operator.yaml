@@ -2,4 +2,4 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
     name: eda-server-operator
-    namespace: ansible-prod-axa-es
+    namespace: aap
